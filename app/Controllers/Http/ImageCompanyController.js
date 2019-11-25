@@ -37,9 +37,14 @@ class ImageCompanyController {
         .map(image => company.images().create({ path: image.fileName }))
     )
 
+    if(!company){
+      return response.status(404).json({
+        success: false
+      })
+    }
+
     return response.status(201).json({
-      success: 'Upload Image Logotipo',
-      data: images
+      success: true
     })
   }
 }

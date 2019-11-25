@@ -9,7 +9,7 @@ class ImageEvaluation extends Model {
         }
 
         getUrl ({ path }) {
-        return `${Env.get('APP_URL')}/image/${path}`
+        return `${Env.get('APP_URLL')}/image/${path}`
         }
 }
 

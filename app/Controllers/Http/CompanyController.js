@@ -31,11 +31,11 @@ class CompanyController {
     const company = await Company.findOrCreate(data)
     if (company) {
       response.status(201).json({
-        success: 'Created Company',
-        data: data
+        success: true,
+        data: company['id']
       })
     } else {
-      response.status(204).send({ error: 'Company Not Created' })
+      response.status(204).send({ success: false, data: 'Company Not Created' })
     }
   }
 

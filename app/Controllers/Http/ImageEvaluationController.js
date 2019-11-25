@@ -16,16 +16,18 @@ class ImageEvaluationController {
    * POST images
    */
   async store ({ params, request, response }) {
-    const evalualuation = await Evalualuation.findOrFail(params.id)
+    const evalualuation = await Evalualuation.find(params.id)
 
     const images = request.file('image', {
       types: ['image'],
       size: '30mb'
     })
 
-    await images.moveAll(Helpers.tmpPath('uploads'), file => ({
+    if(images){
+      await images.moveAll(Helpers.tmpPath('/uploads'), file => ({
       name: `${Date.now()}-${file.clientName}`
     }))
+    }
 
     if (!images.movedAll()) {
       return images.errors()
@@ -36,10 +38,15 @@ class ImageEvaluationController {
         .movedList()
         .map(image => evalualuation.images().create({ path: image.fileName }))
     )
-
-    return response.status(201).json({
-      success: 'Upload Image Evaluation',
-      data: images
+    
+    if(!evalualuation){
+      return response.status(404).json({
+        success: false
+      })
+    }
+    
+     return response.status(201).json({
+      success: true
     })
   }
 }

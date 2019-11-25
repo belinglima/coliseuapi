@@ -9,9 +9,17 @@ class UserController {
    * GET user
    */
   async index () {
-    const user = User.query()
+    const user = await User.query()
     .with('images')
     .fetch()
+
+    if(user.rows.length === 0 ) {
+      response.status(404).json({ 
+        user: 'Não existem usuários cadastrados.',
+        data: false 
+      })
+    } 
+
     return user 
   }
 
@@ -30,14 +38,28 @@ class UserController {
       "birthday",
       "isAdmin"
     ])
-    const user = await User.findOrCreate(data)
-    if (user) {
-      response.status(201).json({
-        success: 'Created User',
-        data: data
+
+    if (data['name'] === '' || 
+        data['company_id']  === '' || 
+        data['email']  === '' || 
+        data['password'] === '' ||
+        data['username']  === '' || 
+        data['birthday'] === ''  || 
+        data['isAdmin']  === '' ) {
+
+      response.status(200).json({ 
+        data: 'Necessário preencher os campos.' 
       })
     } else {
-      response.status(204).send({ error: 'User Not Created' })
+      const user = await User.findOrCreate(data)
+      if (user) {
+        response.status(201).json({
+          success: true,
+          data: user['id']
+        })
+      } else {
+        response.status(204).send({ success: false, error: 'User Not Created' })
+      }
     }
   }
 
@@ -45,9 +67,24 @@ class UserController {
    * Display a single user.
    * GET user/:id
    */
-  async show ({ params }) {
+
+  async show ({ params, response }) {
     const user = await User.find(params.id)
-    await user.load('images')
+    
+    if(user){
+      await user.load('images')
+    } else {
+      response.status(404).json({ 
+        user: 'Não existe usuário cadastrado com esse id.' 
+      })
+    }
+
+    // if(user.rows === 0 ) {
+    //   response.status(404).json({ 
+    //     user: 'Não existem usuários cadastrados.' 
+    //   })
+    // } 
+
     return user
   }
 
@@ -66,16 +103,25 @@ class UserController {
       "birthday",
       "isAdmin"
     ])
-    user.merge(data)
-    if (user) {
-      response.status(200).json({
-        success: 'User Updated',
-        data: data
-      })
-      await user.save()
-    } else {
-      response.status(304).send({ error: 'User Not Updated' })
-    }
+
+    // if (!data['name'] || !data['company_id'] || !data['email'] || !data['password'] || 
+    // !data['username'] || !data['birthday'] || !data['isAdmin']) {
+
+    //   response.status(200).json({ 
+    //     data: 'Necessário preencher os campos.'
+    //   })
+    // } else {
+      user.merge(data)
+      if (user) {
+        response.status(200).json({
+          success: true,
+          data: user['id']
+        })
+        await user.save()
+      } else {
+        response.status(304).send({ success: false, data: 'User Not Updated' })
+      }
+    // }
   }
 
   /**
@@ -87,12 +133,12 @@ class UserController {
       const user = await User.find(params.id)
        if (user) {
          response.status(200).json({
-           success: 'Deleted User',
-           data: user
+           success: true,
+           data: user['id']
          })
          await user.delete()
        }else {
-         response.status(404).send({ error: 'User Not Found' })
+         response.status(404).send({ success: false, data: 'User Not Found' })
        }
   }
 }

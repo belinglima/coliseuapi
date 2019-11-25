@@ -1,49 +1,73 @@
 const Evaluation = use('App/Models/Evaluation')
 
 /**
- * Resourceful controller for interacting with user
+ * Resourceful controller for interacting with evaluation
  */
 class EvaluationController {
   /**
-   * Show a list of all user.
-   * GET user
+   * Show a list of all evaluations.
+   * GET evaluation
    */
-  async index () {
-    const evaluation = Evaluation.query()
-    .with('images')
-    .with('weight')
-    .fetch()
-    return evaluation 
+  async index ({response}) {
+      const evaluation = await Evaluation.query()
+      .with('images')
+      .with('weight')
+      .fetch()
+
+      if(evaluation.rows.length === 0 ) {
+        response.status(404).json({ 
+          evaluation: 'Não existem Avaliações cadastradas.',
+          data: false 
+        })
+      } 
+      
+      return evaluation    
   }
 
   /**
-   * Create/save a new user.
-   * POST user
+   * Create/save a new evaluation.
+   * POST 
    */
-  // async store ({ request, response }) {}
   async store ({ request, response }) {
+    
     const data = request.only([
-      "user_id", 
-      "valorPago"
+      'user_id', 
+      'valorPago',
     ])
-    const evaluation = await Evaluation.findOrCreate(data)
-    if (evaluation) {
-      response.status(201).json({
-        success: 'Created Evaluation',
-        data: data
+
+    if (!data['user_id'] || !data['valorPago']) {
+      response.status(200).json({ 
+        data: 'Necessário preencher os campos.' 
       })
     } else {
-      response.status(204).send({ error: 'Evaluation Not Created' })
+      const evaluation = await Evaluation.findOrCreate(data);
+      if (evaluation) {
+        response.status(201).json({
+          success: true,
+          data: evaluation['id']
+        })
+      } else {
+        response.status(204).send({ success: false, data: 'Evaluation Not Created' })
+      }
     }
   }
-
+    
+  
   /**
    * Display a single user.
    * GET user/:id
    */
-  async show ({ params }) {
+  async show ({ params, response }) {
+
     const evaluation = await Evaluation.find(params.id)
     await evaluation.loadMany(['images', 'weight'])
+
+    if(evaluation.rows === 0 ) {
+      response.status(404).json({ 
+        evaluation: 'Não existem Avaliações cadastradas.' 
+      })
+    } 
+
     return evaluation
   }
 
@@ -57,15 +81,22 @@ class EvaluationController {
       "user_id", 
       "valorPago"
     ])
+
+    if(!data['user_id'] || !data['valorPago']){
+      response.status(200).json({ 
+        data: 'Necessário preencher os campos.' 
+      })
+    }
+
     evaluation.merge(data)
     if (evaluation) {
       response.status(200).json({
-        success: 'Evaluation Updated',
-        data: data
+        success: true,
+        data: evaluation['id']
       })
       await evaluation.save()
     } else {
-      response.status(304).send({ error: 'Evaluation Not Updated' })
+      response.status(304).send({ success: false })
     }
   }
 
@@ -78,7 +109,7 @@ class EvaluationController {
       const evaluation = await Evaluation.find(params.id)
        if (evaluation) {
          response.status(200).json({
-           success: 'Deleted Evaluation',
+           success: true,
            data: evaluation
          })
          await evaluation.delete()

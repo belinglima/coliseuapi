@@ -5,6 +5,9 @@ Route.post('/company', 'CompanyController.store')
 Route.post('/user', 'UserController.store')
 Route.post('/sessions', 'SessionController.create')
 
+Route.get('/novos', 'SessionController.novos')
+Route.get('/novas', 'SessionController.novas')
+
 Route
   .group(() => {
     Route.resource('evaluation', 'EvaluationController').apiOnly()
@@ -12,6 +15,8 @@ Route
     Route.resource('user', 'UserController').apiOnly()
     Route.resource('weight', 'WeightController').apiOnly()
   }).prefix('auth').middleware(['auth'])
+
+    // }).prefix('auth').middleware(['auth'])
 
 Route
   .group(() => {

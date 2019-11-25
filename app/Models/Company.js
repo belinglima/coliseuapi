@@ -11,6 +11,10 @@ class Company extends Model {
     users () {
         return this.hasMany('App/Models/User')
     }
+
+    evaluations () {
+    	return this.hasMany('App/Models/Evaluation')
+    }
 }
 
 module.exports = Company

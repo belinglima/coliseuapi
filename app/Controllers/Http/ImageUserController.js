@@ -37,9 +37,14 @@ class ImageUserController {
         .map(image => user.images().create({ path: image.fileName }))
     )
     
+    if(!user){
+      return response.status(404).json({
+        success: false
+      })
+    }
+    
      return response.status(201).json({
-      success: 'Upload Image User',
-      data: images
+      success: true
     })
   }
 }
