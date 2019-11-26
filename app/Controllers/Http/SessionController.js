@@ -25,6 +25,38 @@ class SessionController {
            .groupBy('mes')
   }
 
+  async imc ({ request, response }) {
+    const idUser = request.only([
+      "id"
+    ])
+	
+
+
+	const user = await Database
+	.select('*')
+	.table('evaluations as e')
+	.where('e.user_id', idUser['id'])
+	.innerJoin('weights as w', 'w.evaluation_id', 'e.id')
+	 .orderBy('e.id', 'DESC')
+	.first()
+
+	const peso = parseFloat(user['peso'])
+	const altura = parseFloat(user['altura'])
+	const imc = peso/(altura*altura)
+
+	  if (user) {
+		response.status(200).json({
+		  imc: imc.toFixed(2)
+		})
+	      } else {
+		response.status(200).json({
+		  data: imc,
+		})
+	      }
+
+
+  }
+
   async usuario ({ request, response }) {
     const email = request.only([
       "email"

@@ -8,6 +8,7 @@ Route.post('/sessions', 'SessionController.create')
 Route.get('/novos', 'SessionController.novos')
 Route.get('/novas', 'SessionController.novas')
 Route.post('/usuario', 'SessionController.usuario')
+Route.post('/eva', 'SessionController.imc')
 
 Route
   .group(() => {
